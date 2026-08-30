@@ -1,0 +1,17 @@
+# secrets and live playbooks
+*.age
+playbook.yaml
+.env
+.env.*
+!.env.example
+keys/
+*.nsec
+*.pem
+
+# junk
+.DS_Store
+node_modules/
+__pycache__/
+.venv/
+dist/
+*.log
