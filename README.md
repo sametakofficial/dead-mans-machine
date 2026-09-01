@@ -30,17 +30,24 @@ What we are *not* aiming at in v1: undetectable Instagram/X bots, CAPTCHA farms,
 
 ## Shape (current thinking)
 
+This repo is the **supervisor**, not a Hermes fork and not an LLM gateway.
+
+- **Core** (no LLM required): check-in wrapper, external clock, sealed playbook, deterministic YAML steps, human escalation.
+- **Hermes** (optional brain): a plugin pack / skill that improvises after fire.
+- **NewAPI** (optional depot): self-hosted OpenAI-compatible pool with quotas. Hermes talks to it like any base URL.
+- **OmniRoute** (optional plugin): cheap/free provider mesh, wired *behind* NewAPI, not as the default brain.
+
 Three layers that should not trust each other:
 
-1. **Clock** — check-in / inactivity detection on infrastructure that is not yours (Healthchecks.io looks like the default; deadcheck + PagerDuty as a harder backup).
-2. **Vault** — encrypted playbook. The watcher should not be able to read it until fire time (`age` is enough to start).
-3. **Executor** — a small webhook receiver that decrypts, then hands the playbook to an agent (Hermes is the likely runtime). Failures fall through to “email a human, ask them to do X.”
+1. **Clock** — Healthchecks.io (deadcheck + PagerDuty as a harder backup). Not a cron on the same box as the agent.
+2. **Vault** — encrypted playbook (`age` is enough to start). The watcher cannot read it until fire.
+3. **Executor** — HMAC webhook → decrypt → YAML runner, then maybe Hermes. Failures fall through to “email a human, ask them to do X.”
 
-Check-in UX is a thin wrapper: Telegram `/alive`, a weekly nudge, a signed `/abort` for you or a trusted contact. The actual timer should not be a cron job on the same box as the agent.
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for the split (core vs plugins, why not fork Hermes).
 
 ## Status
 
-Research notes and a sketch. See [PLAN.md](./PLAN.md).
+Research notes and a sketch. See [PLAN.md](./PLAN.md) and [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 Not a will. Not legal advice. False positives (hospital, travel, depression) are the scary failure mode — grace periods and a trusted-contact abort are part of the design on purpose.
 

@@ -99,8 +99,11 @@ Vision-Chrome-as-the-product, Nopecha in core, volunteer relays as compute, auto
 
 - Hosted Healthchecks vs self-host vs deadcheck-first — hosted is less work; company-risk is real but slow.
 - How aggressive the ladder should be (weeks vs months). False fire is worse than a late fire.
-- Whether Hermes is a hard dependency or the executor stays a boring script with an optional agent.
+- Whether Hermes is a hard dependency or the executor stays a boring script with an optional agent. Current lean: **script is the contract, Hermes is a plugin.**
+- NewAPI as default depot vs Hermes talking to OpenRouter directly. Lean: compose NewAPI, do not vendor (AGPL); OmniRoute only as a cheap channel.
 - Legal/ToS: auto-posting to Instagram/X/YouTube as the owner is likely against their rules even if the owner is dead. Prefer APIs you control and humans.
+
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for core vs plugins and the Hermes/NewAPI/OmniRoute split.
 
 ## Non-goals (for now)
 
