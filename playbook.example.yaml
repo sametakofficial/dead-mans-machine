@@ -1,0 +1,36 @@
+# Copy to playbook.yaml, edit, then:
+#   age -r <executor-age-pubkey> -o playbook.yaml.age playbook.example.yaml
+# Never commit playbook.yaml.
+
+version: 1
+owner: your-name
+
+# Extra wait after Healthchecks says DOWN, before any step runs.
+abort_window_hours: 48
+
+on_fire:
+  - type: email
+    to:
+      - family@example.com
+    subject: "Automated message — I have been unreachable"
+    body_file: letters/family.md
+
+  - type: github
+    action: make_public
+    repos:
+      - you/ideas
+      - you/notes
+
+  - type: telegram
+    chat: trusted-group
+    text_file: letters/telegram.md
+
+  # The important step. If everything else fails, this still asks a person.
+  - type: human_help
+    to:
+      - friend@example.com
+    ask: >
+      I have been silent long enough that my dead-man's machine fired.
+      Please make the repos above public if the bot could not, and send
+      letters/family.md to the people listed. Reply to this mail if you
+      did it, or if you know I am actually fine (false alarm).

@@ -86,8 +86,11 @@ Healthchecks check; Telegram `/alive` `/status` `/dead-now`; ntfy reminder; a se
 **Second slice** — ladder + abort  
 Warn / trusted-contact mail / signed abort URL; webhook receiver that only verifies HMAC and logs.
 
-**Third slice** — executor  
-`age` playbook; mail + GitHub + Telegram + human_help; Hermes skill; dry-run; prepaid API credits on the executor host only.
+**Third slice** — executor (still no LLM)  
+`age` playbook; YAML runner for `email` / `github` / `telegram` / `human_help`; dry-run default. This is the “working core.”
+
+**Fourth slice** — optional brain/depot  
+Hermes plugin pack (`plugins/brain/hermes`); compose NewAPI; OmniRoute only as a NewAPI channel. Core must still fire if those are absent.
 
 **Later, maybe**  
 deadcheck/PagerDuty as a second clock; Shamir shares; Arweave copy of ciphertext; a friend-run watcher; browser-use for one or two sites, with CAPTCHA escalating to a human, not to a solver API in-tree.

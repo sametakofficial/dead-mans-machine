@@ -1,0 +1,7 @@
+name: depot-newapi
+slot: depot
+default: false
+description: Optional OpenAI-compatible quota pool. Compose the upstream image; do not vendor (AGPL).
+# Hermes OPENAI_BASE_URL -> http://new-api:3000/v1
+interface:
+  - openai_compat

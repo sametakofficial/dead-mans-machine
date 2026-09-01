@@ -1,0 +1,7 @@
+name: clock-healthchecks
+slot: clock
+default: true
+description: Ping a Healthchecks.io (or self-hosted) check URL. DOWN webhook is the fire signal.
+interface:
+  - ping
+  - fail

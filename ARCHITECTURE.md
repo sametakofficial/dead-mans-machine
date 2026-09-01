@@ -146,6 +146,8 @@ compose.yml                protocol + (optional) new-api + (optional) hermes
 
 v1 compose can be protocol-only. NewAPI and Hermes are profiles.
 
+Stub manifests live under `plugins/` already so the slots are visible before any code. `playbook.example.yaml` is the fire contract.
+
 ## What “working core” means
 
 A demo we can run without an LLM:

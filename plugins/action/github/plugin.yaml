@@ -1,0 +1,5 @@
+name: action-github
+slot: action
+description: Make listed repositories public (or draft a human_help if the token cannot).
+interface:
+  - run_step

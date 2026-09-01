@@ -1,0 +1,1 @@
+Automated note: my dead-man's machine fired after a long silence. Trusted contacts should have email with next steps. If you can reach me, tell the machine to abort.

@@ -1,0 +1,5 @@
+name: action-email
+slot: action
+description: SMTP send from playbook steps.
+interface:
+  - run_step

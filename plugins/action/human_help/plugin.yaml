@@ -1,0 +1,5 @@
+name: action-human-help
+slot: action
+description: Mail a named person a concrete checklist. Core guarantee when APIs fail.
+interface:
+  - run_step

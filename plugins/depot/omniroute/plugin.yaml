@@ -1,0 +1,6 @@
+name: depot-omniroute
+slot: depot
+default: false
+description: Optional cheap/free router. Enable as a NewAPI channel, not as the primary brain.
+interface:
+  - openai_compat

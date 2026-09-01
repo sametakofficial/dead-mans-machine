@@ -1,0 +1,8 @@
+name: brain-hermes
+slot: brain
+default: false
+description: Optional. After YAML steps, start Hermes with the bundled skill. Not the clock.
+# Install into Hermes separately, e.g.:
+#   hermes plugins install sametakofficial/dead-mans-machine
+interface:
+  - after_fire
