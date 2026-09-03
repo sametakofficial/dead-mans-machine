@@ -90,7 +90,7 @@ Warn / trusted-contact mail / signed abort URL; webhook receiver that only verif
 `age` playbook; YAML runner for `email` / `github` / `telegram` / `human_help`; dry-run default. This is the “working core.”
 
 **Fourth slice** — optional brain/depot  
-Hermes plugin pack (`plugins/brain/hermes`); compose NewAPI; OmniRoute only as a NewAPI channel. Core must still fire if those are absent.
+WhyCodes one-shot (`plugins/brain/whycodes`) on a small box, or a Hermes skill if they already have Hermes; NewAPI as a neighbor compose, not a fork; OmniRoute only as a NewAPI channel. Core must still fire if those are absent.
 
 **Later, maybe**  
 deadcheck/PagerDuty as a second clock; Shamir shares; Arweave copy of ciphertext; a friend-run watcher; browser-use for one or two sites, with CAPTCHA escalating to a human, not to a solver API in-tree.

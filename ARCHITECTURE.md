@@ -8,25 +8,29 @@ How the pieces might fit. Not a freeze.
 
 **Not “Hermes, but with extra keep-alive hacks.”** A hidden patch that keeps someone else’s agent process alive is fragile and unreviewable.
 
-**This repo is the supervisor around an agent:** a clock, a sealed playbook, a fire path, and a small plugin surface. Hermes is the *optional* brain that runs after fire. NewAPI is the *optional* model depot the brain talks to.
+**This repo is the trigger + vault + YAML contract.** Everything else is a neighbor we call.
 
-If Hermes is down, prepaid credits are empty, or the user never installed an agent, the core should still: notice silence, warn, wait for abort, then send the emails / open the repos / ask a human. The agent is how it *improvises*. The YAML is how it *guarantees*.
+- **NewAPI** is not in-tree. It is an external model depot — the same way OpenAI or Anthropic would be. We speak OpenAI-compat to it. Users who already run NewAPI (or OpenRouter directly) just paste a base URL.
+- **Brains** (Hermes, WhyCodes, later others) are external runtimes. We start them at fire time, or ping a Hermes that already lives on Telegram. We do not fork them.
+- If every brain is missing, prepaid credits are empty, or the agent hangs: core still warns, waits for abort, sends the emails, opens the repos, asks a human. YAML guarantees. Agents improvise.
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│ dead-mans-machine          (this repo)                  │
-│  protocol  vault  executor  plugins                     │
+│ dead-mans-machine          (this repo = trigger)        │
+│  protocol  vault  yaml-runner  plugin slots             │
 └───────────────┬───────────────────────────┬─────────────┘
-                │ fire /alive               │ OpenAI-compat
+                │ ping / FIRE               │ OpenAI-compat
                 ▼                           ▼
-         Healthchecks.io              NewAPI  (depot)
-         (or deadcheck)                     │
-                                            ├ OpenRouter / keys
-                                            └ OmniRoute plugin (cheap/free)
+         Healthchecks.io              NewAPI   (external depot)
+         (or deadcheck)               = "our OpenAI" for this box
+                                            ├ user’s keys / OpenRouter
+                                            └ OmniRoute (optional cheap channel)
                 │
                 ▼
-         Hermes  (runtime, not forked)
-            skills + our plugin pack
+         brain slot (pick zero or one)
+            WhyCodes   default-ish on a tiny VPS (one Rust binary)
+            Hermes     if they already run it (Telegram gateway, skills)
+            none       YAML only
 ```
 
 Three processes, not one binary:
@@ -34,8 +38,8 @@ Three processes, not one binary:
 | Process | Stays up how | Needs GPU/LLM? |
 | --- | --- | --- |
 | **protocol** (thin watcher) | several copies ping the same Healthchecks URL | no |
-| **depot** (NewAPI) | prepaid VPS + prepaid upstream credits | no (it proxies) |
-| **executor** (script, then maybe Hermes) | same prepaid box, sleeps until webhook | only after FIRE |
+| **depot** (NewAPI, *their* compose) | prepaid VPS + prepaid upstream credits | no (it proxies) |
+| **executor** (our YAML runner, then maybe a brain) | same prepaid box, sleeps until webhook | only after FIRE |
 
 ## Core vs plugins
 
@@ -59,9 +63,9 @@ Core jobs:
 | Nudge | `telegram` + `ntfy` | email only |
 | Vault | `age` file | later Shamir / tlock / Arweave |
 | Actions | `email`, `github`, `telegram`, `human_help` | later `browser`, `nostr_note` |
-| Brain | none (YAML runner) | `hermes` |
-| Depot | none (Hermes’ own keys) | `newapi` |
-| Cheap router | off | `omniroute` behind NewAPI |
+| Brain | none (YAML runner) | `whycodes` (light), `hermes` (if already installed) |
+| Depot | none (brain’s own keys) | `newapi` as a neighbor, not a submodule |
+| Cheap router | off | `omniroute` *behind* NewAPI |
 
 A plugin here is a directory with a small manifest (`plugin.yaml`) and a runner that speaks a boring interface: `ping()`, `notify()`, `decrypt()`, `run_step()`. We can keep this in-process Python/Go at first. Hermes has its *own* plugin system — we use that only for the brain pack, not for the clock.
 
@@ -91,17 +95,19 @@ Hermes  -->  NewAPI
 
 Users who hate NewAPI skip it: Hermes talks to OpenRouter directly. The supervisor does not care.
 
-## Hermes: runtime we attach to, not the product
+## Brains: WhyCodes vs Hermes vs none
 
-We ship a **Hermes plugin pack** (their format: `plugin.yaml`, skill, maybe `/dmm` slash commands):
+The product is not “an agent with a dead-man switch taped on.” It is a switch that *may* hire an agent.
 
-- skill `dead-mans-machine`: read decrypted playbook, attempt steps, on failure call `human_help`
-- optional tools: `dmm_status`, `dmm_abort` (only useful while the owner is alive)
-- model provider snippet: `base_url: $NEWAPI`
+**WhyCodes** ([whycorporation/whycodes](https://github.com/whycorporation/whycodes), [why.codes](https://why.codes)) — Rust, one native binary, ~10 MB idle, `whycodes generate "…" --format json` for headless fire, OpenAI-compat (so it can point at NewAPI), `AGENTS.md` / skills, GitHub tools, optional CDP browser. Fits a cheap always-on box. Good **default brain plugin** when we want improvisation without dragging a Python gateway.
 
-Install path they already have: `hermes plugins install sametakofficial/dead-mans-machine` (or a pack file). We do not patch Hermes internals.
+**Hermes** — heavier, already has Telegram/Discord gateway, cron, a rich plugin/skill system. Good when the owner *already* lives in Hermes. Then DMM is just: Healthchecks + webhook + “message the Hermes bot / run this skill.” We still do not become a Hermes keep-alive daemon.
 
-Hermes cron is fine for **weekly `/alive` pings** (`no_agent` script). It is a bad place to *be* the clock: if that gateway dies, the switch dies. Healthchecks remains the clock; Hermes is one of N pingers.
+**none** — YAML runner only. This is the core demo. Ship this first.
+
+A “plugin network” is right for **brains and actions**. It is wrong as the *identity* of the repo. If DMM is only a marketplace of other people’s agents, there is no clock, no vault, no abort, no `human_help` contract. Keep a small core; let WhyCodes/Hermes/email/github register in slots.
+
+Do not make WhyCodes the heart either. It is a coding agent. Fire-day jobs are mostly mail + git + “ask a person.” A 10 MB binary is a nice *optional* worker, not the supervisor.
 
 ## Fire path (v1)
 
@@ -118,8 +124,8 @@ owner taps /alive
                                          executor
                                            ├ decrypt playbook
                                            ├ run YAML steps   ← always
-                                           └ if brain=hermes
-                                                start Hermes with skill
+                                           └ if brain=whycodes|hermes
+                                                one-shot generate / skill
                                                 NewAPI if configured
 ```
 
@@ -134,8 +140,9 @@ executor/          webhook + yaml runner
 plugins/
   clock/healthchecks/
   clock/deadcheck/         (later)
-  brain/hermes/            pack: skill + plugin.yaml
-  depot/newapi/            compose snippet + channel examples
+  brain/whycodes/          default-ish light brain (generate --format json)
+  brain/hermes/            pack: skill + plugin.yaml (if they already run Hermes)
+  depot/newapi/            compose *example* only — image stays upstream
   depot/omniroute/         optional NewAPI channel
   action/email/
   action/github/

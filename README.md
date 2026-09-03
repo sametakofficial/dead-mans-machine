@@ -33,9 +33,10 @@ What we are *not* aiming at in v1: undetectable Instagram/X bots, CAPTCHA farms,
 This repo is the **supervisor**, not a Hermes fork and not an LLM gateway.
 
 - **Core** (no LLM required): check-in wrapper, external clock, sealed playbook, deterministic YAML steps, human escalation.
-- **Hermes** (optional brain): a plugin pack / skill that improvises after fire.
-- **NewAPI** (optional depot): self-hosted OpenAI-compatible pool with quotas. Hermes talks to it like any base URL.
-- **OmniRoute** (optional plugin): cheap/free provider mesh, wired *behind* NewAPI, not as the default brain.
+- **WhyCodes** (optional light brain): one Rust binary on a tiny VPS; we call `generate` at fire time. Not the heart of the repo.
+- **Hermes** (optional heavy brain): if they already run it (e.g. Telegram). We message it / run a skill. We do not fork it.
+- **NewAPI** (optional *external* depot): “our OpenAI” — a URL + quota. Not a submodule.
+- **OmniRoute** (optional): cheap/free mesh *behind* NewAPI.
 
 Three layers that should not trust each other:
 

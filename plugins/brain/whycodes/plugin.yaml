@@ -1,0 +1,10 @@
+name: brain-whycodes
+slot: brain
+default: false
+description: >
+  Optional light brain. One native Rust binary; headless
+  `whycodes generate --format json` after YAML steps.
+  Point it at NewAPI (or any OpenAI-compat URL). Not the clock.
+# https://github.com/whycorporation/whycodes
+interface:
+  - after_fire
